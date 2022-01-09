@@ -1,0 +1,30 @@
+{
+  "name": "dataiku-mfc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": " node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "start": "node web-app/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lnimong/dataiku-mfc.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lnimong/dataiku-mfc/issues"
+  },
+  "homepage": "https://github.com/lnimong/dataiku-mfc#readme",
+  "devDependencies": {
+    "@babel/core": "^7.16.7",
+    "@babel/preset-env": "^7.16.7",
+    "babel-jest": "^27.4.6",
+    "jest": "^27.4.7"
+  },
+  "dependencies": {
+    "express": "^4.17.2"
+  }
+}
