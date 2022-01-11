@@ -18,3 +18,4 @@ pour avancer je propose de partir sur les hypothèse suivantes
 
 1/ le backend a une version "figée" de la configuration du millenium-falcon et l'UI web dépend de cette config et sert à jouer avec la config de l'empire
 2/ la CLI permet de faire des tests en étant plus souples sur les config (en appliquant les config qu'on veut)
+ 
