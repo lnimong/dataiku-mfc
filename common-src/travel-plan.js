@@ -17,12 +17,12 @@ export const dijsktra_travel_plan =
             }, 
             start:null, 
             end:null, 
-            move_validity:() => true,
+            limitation : null,
             route_key : (planet_a, planet_b) => `${planet_a}==>${planet_b}`,
             route_start : (planet_a, route) => route.startsWith(`${planet_a}==>`),
         }
         
-        const { universe : { all_planets, routes_data }, start, end, move_validity, route_key, route_start }  = {
+        const { universe : { all_planets, routes_data }, start, end, route_key, route_start, limitation }  = {
             ...default_params,
             ...input_params?input_params:{}
         }
@@ -34,7 +34,6 @@ export const dijsktra_travel_plan =
             || !end
             || all_planets.length === 0
             || routes_data.length === 0
-             
         ) return []
 
         const infinity = -1
@@ -193,6 +192,9 @@ export const dijsktra_travel_plan =
             nearest_planet = next_planet_to_visit
         }
 
+        if (limitation !== null && limitation.deadline < hash_get (distances, end))
+            return []
+
         _help_('when the end node is reached, reverse the recorded path back to the start node')
         let shortest_path = [ end ]
         let count = origins.length
@@ -205,5 +207,6 @@ export const dijsktra_travel_plan =
         _help_(shortest_path)
         _help_("return the shortest path & the end node's distance from the start node")
         return shortest_path
+        
     }
 

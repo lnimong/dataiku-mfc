@@ -7,8 +7,8 @@ const earth_to_mercury_case =
             all_planets : ['earth', 'venus', 'mercury'],
             routes_data : {
                 'earth==>venus' : { start : 'earth', end : 'venus', distance : 1},
-                'venus==>mercury' : { start : 'venus', end : 'mercury', distance : 1},
-                'earth==>mercury' : { start : 'earth', end : 'mercury', distance : 3},
+                'venus==>mercury' : { start : 'venus', end : 'mercury', distance : 2},
+                'earth==>mercury' : { start : 'earth', end : 'mercury', distance : 4},
                 'mercury==>earth' : { start : 'mercury', end : 'earth', distance : 2}
             }
         }, 
@@ -80,6 +80,18 @@ describe ( "the travel plan", () => {
     test ("works for earth_to_mercury_case", () => {
         expect (dijsktra_travel_plan(earth_to_mercury_case.input))
         .toEqual(earth_to_mercury_case.expected_output)
+    })
+
+    test ("return an empty travel plan if the deadline is shorter than the best path", () => {
+        expect (
+            dijsktra_travel_plan({ 
+                ...earth_to_mercury_case.input,
+                limitation : {
+                    deadline : 1
+                }
+            })
+        )
+        .toEqual([])
     })
 
     test ("works for earth_to_uranus_case", () => {
