@@ -86,8 +86,8 @@ describe ( "the travel plan", () => {
         expect (
             dijsktra_travel_plan({ 
                 ...earth_to_mercury_case.input,
-                limitation : {
-                    deadline : 1
+                limitations : {
+                    max_time : 2
                 }
             })
         )

@@ -1,15 +1,10 @@
-const _help_ = (data, overwrite) => {
-    const default_val = false
-    const debug = 
-        (overwrite === true || overwrite === false)
-        ? overwrite
-        : default_val
-    
-    if (debug) console.log(data)
-} 
+import { _helper_ } from "./helper"
+
+const _help_ = _helper_ (false)
 
 export const dijsktra_travel_plan = 
-    (input_params) => {
+    input_params => {
+        const infinity = -1
         const default_params = { 
             universe : {
                 all_planets : [],
@@ -17,35 +12,60 @@ export const dijsktra_travel_plan =
             }, 
             start:null, 
             end:null, 
-            limitation : null,
+            limitations : {
+                max_time : infinity,
+                min_required_stops : 0
+
+            },
             route_key : (planet_a, planet_b) => `${planet_a}==>${planet_b}`,
             route_start : (planet_a, route) => route.startsWith(`${planet_a}==>`),
         }
         
-        const { universe : { all_planets, routes_data }, start, end, route_key, route_start, limitation }  = {
+        const no_limitation = !(input_params && input_params.limitations)
+
+        const { universe : { all_planets, routes_data }, start, end, route_key, route_start, limitations : {  max_time, min_required_stops } }  = {
             ...default_params,
             ...input_params?input_params:{}
         }
+        
+        const no_max_time_limitation = (no_limitation || max_time === infinity)
+        const max_allowed_stops = 
+            no_max_time_limitation
+            ? infinity
+            : max_time
+
+        const planet_stop = n => p => `${p}@${n}`
+        const planet_stop_name = p => p.split('@')[0]
+        const first_stop = planet_stop (0)
+
+        const all_planets_stops =  
+            all_planets
+            .map(
+                pname => 
+                    [...Array(max_allowed_stops === infinity?1:max_allowed_stops).keys()]
+                    .map(stop_num => planet_stop (stop_num) (pname)) 
+            )
+            .flat()
+
 
         if (
-            !all_planets
+            !all_planets_stops
             || !routes_data
             || !start
             || !end
-            || all_planets.length === 0
+            || all_planets_stops.length === 0
             || routes_data.length === 0
         ) return []
 
-        const infinity = -1
 
         _help_ ('https://levelup.gitconnected.com/finding-the-shortest-path-in-javascript-dijkstras-algorithm-8d16451eea34')
         let hash = 
-            all_planets
+            all_planets_stops
             .reduce(
                 (result, planet_name, ind)=>({
                     ...result,
                     [planet_name] : ind
-                }), 
+                }),
                 {}
             )
         
@@ -57,156 +77,140 @@ export const dijsktra_travel_plan =
         let hash_get = 
             (array, planet_key) => array[hash[planet_key]]
 
-        _help_('track distances from the start node using a hash object')
-        let distances = 
-            all_planets
+        let bounty_hunters_encounters = 
+            all_planets_stops
+            .map(_ => 0)
+ 
+        let travel_durations = 
+            all_planets_stops
             .map(_ => infinity)
         
-        all_planets
+        all_planets_stops
         .forEach (
             planet => 
-                hash_update (distances, planet) ( 
-                    planet === start
+                hash_update (travel_durations, planet) ( 
+                    planet === planet_stop (1) (start)
                     ? 0
-                    : routes_data[route_key(start, planet)]
-                    ? routes_data[route_key(start, planet)].distance
+                    : (
+                        routes_data[route_key(start, planet_stop_name(planet))] 
+                        && (
+                            no_max_time_limitation 
+                            || routes_data[route_key(start, planet_stop_name(planet))].distance < max_time
+                        )
+                    )
+                    ? routes_data[route_key(start, planet_stop_name(planet))].distance
                     : infinity
                 )
         )
-
 	
-        _help_('track paths using a hash object (parents)')
         let origins = 
-            all_planets
+            all_planets_stops
             .map(_ => null)
         
-        all_planets
+        all_planets_stops
         .forEach (
             planet => 
                 hash_update (origins, planet) (
-                    routes_data[route_key(start, planet)]
-                    ? start
+                    planet === planet_stop (1) (start)
+                    ? first_stop (start)
+                    : routes_data[route_key(start, planet_stop_name (planet))] 
+                    && (
+                        no_max_time_limitation 
+                        || routes_data[route_key(start, planet_stop_name (planet))].distance < max_time
+                    )
+                    ? first_stop (start)
                     : null
                 )
         )
         
         _help_('collect visited nodes')
-        let visited_planets = new Set ([])
+        let visited_planets = new Set ([start])
 
         _help_('find the nearest node')
-        const compute_nearest_unvisited_planet = 
+        const compute_best_unvisited_planet = 
             () => {
                 let known_distances =
-                    all_planets
+                    all_planets_stops
                     .filter (
                         planet => 
-                            !visited_planets.has (planet)
-                            && hash_get (distances, planet) !== infinity
+                            !visited_planets.has (planet_stop_name(planet))
+                            && hash_get (travel_durations, planet) !== infinity
                     )
                 let nearest_planet = null
                 known_distances
                 .forEach (
                     planet => 
                         nearest_planet = 
-                            nearest_planet && hash_get(distances, planet) < hash_get(distances, nearest_planet)
+                            nearest_planet && hash_get(travel_durations, planet) < hash_get(travel_durations, nearest_planet)
                             ? planet
                             : !nearest_planet 
                             ? planet
                             : nearest_planet
                 )
-                
-                visited_planets.add(nearest_planet)
+                if(nearest_planet)
+                    visited_planets.add(planet_stop_name(nearest_planet))
                 return nearest_planet
             }
 
-        let nearest_planet = compute_nearest_unvisited_planet ()
+        const will_encounter_bounty_hunters = (planet, day) => {
+            return false
+        } 
+        
+        let best_planet = compute_best_unvisited_planet ()
         
         _help_('for that node:')
         const all_existing_routes_keys = Object.keys(routes_data)
         
-        while (nearest_planet) {
+        while (best_planet) {
 
-            _help_('find its child nodes')
-            let distance_to_nearest_planet = hash_get (distances, nearest_planet)
-            let nearest_planet_followings =
+            let time_to_best_planet = 
+                hash_get (travel_durations, best_planet)
+            
+            let best_planet_followings =
                 all_existing_routes_keys
-                .filter(route => route_start(nearest_planet, route) && routes_data[route].end !== start) 
-                .map(route => routes_data[route].end)
-                
-            _help_ (
-                `hash : ${JSON.stringify( hash)}\n`
-                + `distances : ${distances}\n`
-                + `origins : ${origins}\n`
-                + `distance_to_nearest_planet : ${distance_to_nearest_planet}\n`
-                + `nearest_planet_followings : ${nearest_planet_followings}\n`
-                + `visited_planets : ${[...visited_planets]}\n`
-                + `nearest_planet : ${nearest_planet}\n`
-            )
-
-            _help_('for each of those child nodes:')
-            nearest_planet_followings
+                .filter(
+                    route => 
+                        (max_time === infinity || routes_data[route].distance + time_to_best_planet <= max_time)
+                        && route_start(planet_stop_name(best_planet), route)
+                        && routes_data[route].end !== start
+                ) 
+                .map(route => first_stop (routes_data[route].end))
+          
+            best_planet_followings
             .forEach (next_planet => {
 
-                _help_('make sure each child node is not the start node')
-                _help_('save the distance from the start node to the child node')
-                let new_distance = distance_to_nearest_planet + routes_data[route_key(nearest_planet, next_planet)].distance
-                        
-                _help_ (
-                    `hash : ${JSON.stringify( hash)}\n`
-                    + `distance to ${next_planet} : ${hash_get(distances, next_planet)}\n`
-                    + `new potential distance : ${new_distance}\n`
-                    + `will be updated : ${
-                        hash_get(distances, next_planet) === infinity
-                        || hash_get(distances, next_planet) > new_distance
-                    }\n`
-                )
-
-                _help_("if there's no recorded distance from the start node to the child node in the distances object")
-                _help_('or if the recorded distance is shorter than the previously stored distance from the start node to the child node')
+                let new_time = 
+                    time_to_best_planet 
+                    + routes_data[route_key(planet_stop_name(best_planet), planet_stop_name(next_planet) )].distance
+              
                 if (
-                    hash_get(distances, next_planet) === infinity
-                    || hash_get(distances, next_planet) > new_distance
+                    hash_get(travel_durations, next_planet) === infinity
+                    || hash_get(travel_durations, next_planet) > new_time
                 ) {
-                    _help_('save the distance to the object')
-                    hash_update(distances, next_planet) (new_distance)
-                    _help_('record the path')
-                    hash_update(origins, next_planet) (nearest_planet)
+                    hash_update(travel_durations, next_planet) (new_time)
+                    hash_update(origins, next_planet) (best_planet)
+                    // if (will_encounter_bounty_hunters (planet_stop_name(next_planet), new_time))
+                    //     hash_update(bounty_hunters_encounters, next_planet) (
+                    //         1 + hash_get (bounty_hunters_encounters, next_planet) 
+                    //     )
                 }
             })        
 
+            const next_planet_to_visit = compute_best_unvisited_planet () 
 
-            _help_('move the current node to the visited set')
-            const next_planet_to_visit = compute_nearest_unvisited_planet () 
-
-            _help_ (
-                `hash : ${JSON.stringify( hash)}\n`
-                + `distances : ${distances}\n`
-                + `origins : ${origins}\n`
-                + `visited_planets : ${[...visited_planets]}\n`
-                + `nearest_planet : ${nearest_planet}\n`
-                + `next_planet_to_visit : ${next_planet_to_visit}\n`
-                + `---------------------------------------`
-            )
-
-            _help_('move to the nearest neighbor node')
-            nearest_planet = next_planet_to_visit
+            best_planet = next_planet_to_visit
         }
 
-        if (limitation !== null && limitation.deadline < hash_get (distances, end))
-            return []
+        if (end !== start && hash_get(origins, first_stop(end) ) === null) return []
 
-        _help_('when the end node is reached, reverse the recorded path back to the start node')
-        let shortest_path = [ end ]
+        let shortest_path = [ first_stop(end) ]
         let count = origins.length
         while (shortest_path[0] !== start && count-- > 0) {
             let previous_step = hash_get(origins, shortest_path[0])
             if (previous_step && previous_step !== '') shortest_path.unshift(previous_step)
         }
         
-        _help_('this is the shortest path')
-        _help_(shortest_path)
-        _help_("return the shortest path & the end node's distance from the start node")
-        return shortest_path
+        return shortest_path.map(planet_stop_name)
         
     }
 
