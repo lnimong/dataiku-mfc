@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "test": " node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
-    "start::web": "start http://localhost:3000 && nodemon web-app/index.js"
+    "start::web": "start http://localhost:3000 && nodemon web-app/index.js",
+    "start::serve": "nodemon web-app/index.js"
   },
   "repository": {
     "type": "git",
@@ -28,6 +29,7 @@
   "dependencies": {
     "body-parser": "^1.19.1",
     "express": "^4.17.2",
+    "express-fileupload": "^1.2.1",
     "sqlite": "^4.0.23",
     "sqlite3": "^5.0.2"
   }

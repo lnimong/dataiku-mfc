@@ -28,7 +28,7 @@
             }
 
             #empire_data {
-                background-color: #000022;
+                background-color: #000019;
                 color: #fff;
                 width: 100%;
                 height: 100%;
@@ -41,8 +41,7 @@
                 background-color: #000022;
                 color: #fff;
                 width: 100%;
-                height: 100%;
-                flex: .7;
+                flex: auto;
             }
 
             #odds_display_wrapper {
@@ -221,6 +220,43 @@
 .non_edit {
     color: #bbb;
 }
+#inputfile_wrap {
+    color: white;
+}
+.inputfile {
+	width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+.inputfile + label {
+    font-size: 1.25em;
+    font-weight: 700;
+    color: white;
+    display: inline-block;
+}
+
+
+
+.inputfile:focus + label,
+.inputfile + label:hover {
+    /* background-color: red;
+    width: 120%;
+    height: 120%; */
+  animation: 1s glitch;
+  animation-timing-function: steps(1, end);
+}
+
+
+.inputfile + label {
+	cursor: pointer; /* "hand" cursor */
+}
+
+#filesvg:hover {
+    color: red;
+}
         </style>
 
         <script>
@@ -291,7 +327,12 @@
                     <textarea id="empire_data" ></textarea>
                 </div>
                 <div class="button_wrapper">
-                    <button id="action_button" class="button-49" role="button" onclick="send_empire_data()"> SEND </button>
+                    <button id="action_button" class="button-49" role="button" onclick="send_empire_data()"> SEND </button><br>
+                    <h1>OR</h1><br>
+                    <form id="inputfile_wrap">
+                        <input type="file" name="file" id="file" class="inputfile" onchange="upload_empire_data ()" />
+                        <label for="file"><svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 20 17"><path id="filesvg" stroke="white" d="M10 0l-5.2 4.9h3.3v5.1h3.8v-5.1h3.3l-5.2-4.9zm9.3 11.5l-3.2-2.1h-2l3.4 2.6h-3.5c-.1 0-.2.1-.2.1l-.8 2.3h-6l-.8-2.2c-.1-.1-.1-.2-.2-.2h-3.6l3.4-2.6h-2l-3.2 2.1c-.4.3-.7 1-.6 1.5l.6 3.1c.1.5.7.9 1.2.9h16.3c.6 0 1.1-.4 1.3-.9l.6-3.1c.1-.5-.2-1.2-.7-1.5z"></path></svg> <br> <span>upload</span></label>
+                    </form>
                 </div>
                 <div id="messages" class="non_edit"> </div>
             </div>
@@ -338,7 +379,7 @@
                     'millenium falcon to rebel command... do you copy... ?',
                     'millenium falcon to rebel command... do you copy... ?',
                     'this is C3PO from the millenium falcon speaking',
-                    'we are currently on stationning Tatooine',
+                    'we are currently stationning on Tatooine',
                     'our mission is to reach Endor and join the Rebel fleet',
                     'and destroy the Death Star before it annihilates the planet',
                     'we need your help with the data you itercepted from the empire'
@@ -351,7 +392,7 @@
         const writing2 = 
             writer (
                 () => document.getElementById("example_title"), 
-                'HERE IS AN EXAMPLE'
+                'HERE IS AN EXAMPLE...'
             ) 
 
         writing2.start()
@@ -373,6 +414,49 @@
                     })
                     .then(response => response.json())
                     .then(({odds, travel_plan}) =>{ 
+                        output_odds.innerHTML = `${odds}%`
+                        const template = document.getElementById("travel_stops").innerHTML
+                        output_plan.innerHTML = 
+                            travel_plan
+                            .map(
+                                ({ planet, risky }) => 
+                                    template
+                                    .replace ('{0}', planet)
+                                    .replace ('{1}', risky ? 'WARNING' : 'SAFE')
+                                    .replace ('{2}', risky ? 'warning' : 'safe')
+                            )
+                            .join(" ")
+                    })
+                    .catch(function(res){ 
+                        output_odds.innerHTML = `bad_input`
+                        console.log(res) 
+                    })
+        }
+        
+        function upload_empire_data (e) {
+            const empire_data = document.getElementById("empire_data").value
+            const output_odds = document.getElementById("odds_display")
+            const output_plan = document.getElementById("travel_plan")
+
+            const { files } = document.getElementById("file")
+            const form_data = new FormData()
+            form_data.append('file', files[0])
+            console.log(files)
+
+            fetch(
+                "/api/compute-odds/upload",
+                    {
+                        headers: {
+                            'Accept': 'application/json'
+                        },
+                        method: "POST",
+                        body: form_data
+                    })
+                    .then(response => response.json())
+                    .then(({empire_json, result : { odds, travel_plan }}) =>{ 
+                        document.getElementById("empire_data").value = JSON.stringify(empire_json,null, 2)
+                        document.getElementById("file").value = null
+
                         output_odds.innerHTML = `${odds}%`
                         const template = document.getElementById("travel_stops").innerHTML
                         output_plan.innerHTML = 
