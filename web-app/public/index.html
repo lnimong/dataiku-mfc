@@ -217,6 +217,10 @@
     height: 50px;
     padding:5px 0;
 }
+
+.non_edit {
+    color: #bbb;
+}
         </style>
 
         <script>
@@ -289,7 +293,7 @@
                 <div class="button_wrapper">
                     <button id="action_button" class="button-49" role="button" onclick="send_empire_data()"> SEND </button>
                 </div>
-                <div id="messages"> </div>
+                <div id="messages" class="non_edit"> </div>
             </div>
             
             <div class="io_wrapper">
@@ -303,8 +307,8 @@
 
             </div>
             
-            <div>
-                <div id="example_title"></div>
+            <div class="non_edit">
+                <div id="example_title" ></div>
                 <div id="example">
                         {<br>
                         &nbsp;&nbsp;"countdown": 8, <br>
