@@ -1,5 +1,11 @@
 # README
 
+<br>
+<br>
+
+## modules organsations :
+<img src="docs/tech-doc.png">
+
 ## requirements :
  
 - node (version >= 14.4.0)
@@ -71,9 +77,3 @@ $ give-me-the-odds.bat ./config/millennium-falcon.json ./examples/empire.json
 ```
 $ give-me-the-odds.sh ./config/millennium-falcon.json ./examples/empire.json
 ```
-
-<br>
-<br>
-
-## running the cli :
-<img src="docs/tech-doc.png">
