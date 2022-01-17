@@ -171,6 +171,55 @@
   }
 }
 
+
+
+@keyframes glitch2 {
+  0% {
+    clip-path: var(--slice-1);
+    transform: translate(-10px, -5px);
+  }
+  10% {
+    clip-path: var(--slice-3);
+    transform: translate(5px, 5px);
+  }
+  20% {
+    clip-path: var(--slice-1);
+    transform: translate(-5px, 5px);
+  }
+  30% {
+    clip-path: var(--slice-3);
+    transform: translate(0px, 2.5px);
+  }
+  40% {
+    clip-path: var(--slice-2);
+    transform: translate(-2.5px, 0px);
+  }
+  50% {
+    clip-path: var(--slice-3);
+    transform: translate(2.5px, 0px);
+  }
+  60% {
+    clip-path: var(--slice-4);
+    transform: translate(2.5px, 5px);
+  }
+  70% {
+    clip-path: var(--slice-2);
+    transform: translate(-5px, 5px);
+  }
+  80% {
+    clip-path: var(--slice-5);
+    transform: translate(5px, -5px);
+  }
+  90% {
+    clip-path: var(--slice-1);
+    transform: translate(-5px, 0px);
+  }
+  100% {
+    clip-path: var(--slice-1);
+    transform: translate(0);
+  }
+}
+
 @media (min-width: 768px) {
   .button-49,
   .button-49:after {
@@ -245,7 +294,7 @@
     /* background-color: red;
     width: 120%;
     height: 120%; */
-  animation: 1s glitch;
+  animation: 1s glitch2;
   animation-timing-function: steps(1, end);
 }
 
