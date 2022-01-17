@@ -2,9 +2,391 @@
 <html>
     <head>
         <!-- head definitions go here -->
+        
+        <style>
+            body {
+                background-color: #000022;
+                color: #fff;
+                font-family: monospace;
+            }
+
+            .main_wrapper {
+                display: flex;
+                flex-flow: row wrap;
+                min-height:600px;
+                margin: 15px;
+            }
+
+            .io_wrapper {
+                display: flex;
+                flex-flow: column wrap;
+                text-align: center;
+            }
+
+            .main_wrapper>div {
+                flex : 1
+            }
+
+            #empire_data {
+                background-color: #000022;
+                color: #fff;
+                width: 100%;
+                height: 100%;
+                
+                resize: none;
+            }
+
+
+            #empire_data_wrapper {
+                background-color: #000022;
+                color: #fff;
+                width: 100%;
+                height: 100%;
+                flex: .7;
+            }
+
+            #odds_display_wrapper {
+
+            } 
+
+            #odds_display {
+                background-image: url("/img/animation.gif");
+                font-size: 50px;   
+                 border: solid;
+    display: inline-block;
+    width: 250px;
+    height: 250px;
+    border-radius: 250px;
+    vertical-align: middle;
+    line-height: 5em;
+    margin: 20px;
+            }
+
+            #anim {
+                
+    position: fixed;
+    bottom: 50px;
+    right: 50px;
+    border: solid;
+    border-radius: 300px;
+    width: 300px;
+    height: 300px;
+            }
+
+            #action_button {
+                cursor: pointer;
+            }
+
+            .button_wrapper {
+                padding: 20px;
+            }
+/* CSS */
+.button-49,
+.button-49:after {
+  width: 150px;
+  height: 76px;
+  line-height: 78px;
+  font-size: 20px;
+  font-family: 'Bebas Neue', sans-serif;
+  background: linear-gradient(45deg, transparent 5%, #FF013C 5%);
+  border: 0;
+  color: #fff;
+  letter-spacing: 3px;
+  box-shadow: 6px 0px 0px #00E6F6;
+  outline: transparent;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.button-49:after {
+  --slice-0: inset(50% 50% 50% 50%);
+  --slice-1: inset(80% -6px 0 0);
+  --slice-2: inset(50% -6px 30% 0);
+  --slice-3: inset(10% -6px 85% 0);
+  --slice-4: inset(40% -6px 43% 0);
+  --slice-5: inset(80% -6px 5% 0);
+  
+  content: 'ALTERNATE TEXT';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 3%, #00E6F6 3%, #00E6F6 5%, #FF013C 5%);
+  text-shadow: -3px -3px 0px #F8F005, 3px 3px 0px #00E6F6;
+  clip-path: var(--slice-0);
+}
+
+.button-49:hover:after {
+  animation: 1s glitch;
+  animation-timing-function: steps(2, end);
+}
+
+@keyframes glitch {
+  0% {
+    clip-path: var(--slice-1);
+    transform: translate(-20px, -10px);
+  }
+  10% {
+    clip-path: var(--slice-3);
+    transform: translate(10px, 10px);
+  }
+  20% {
+    clip-path: var(--slice-1);
+    transform: translate(-10px, 10px);
+  }
+  30% {
+    clip-path: var(--slice-3);
+    transform: translate(0px, 5px);
+  }
+  40% {
+    clip-path: var(--slice-2);
+    transform: translate(-5px, 0px);
+  }
+  50% {
+    clip-path: var(--slice-3);
+    transform: translate(5px, 0px);
+  }
+  60% {
+    clip-path: var(--slice-4);
+    transform: translate(5px, 10px);
+  }
+  70% {
+    clip-path: var(--slice-2);
+    transform: translate(-10px, 10px);
+  }
+  80% {
+    clip-path: var(--slice-5);
+    transform: translate(20px, -10px);
+  }
+  90% {
+    clip-path: var(--slice-1);
+    transform: translate(-10px, 0px);
+  }
+  100% {
+    clip-path: var(--slice-1);
+    transform: translate(0);
+  }
+}
+
+@media (min-width: 768px) {
+  .button-49,
+  .button-49:after {
+    width: 200px;
+    height: 86px;
+    line-height: 88px;
+  }
+}
+
+        .template {
+            display: none;
+        }
+
+        #travel_plan {
+            padding: 20px;
+        }
+
+#travel_plan>div {
+    padding: 5px;
+    text-transform: uppercase;
+}
+
+#travel_plan>.safe {
+    padding: 5px;
+    background: #aabaff;
+}
+
+#travel_plan>.warning {
+    padding: 5px;
+    background: #ffaaaa;
+}
+
+#messages {
+    height: 40px;
+    margin: 20px;
+}
+#example {
+    height: 300px;
+    padding-top: 20px 0;
+}
+
+#example_title {
+    height: 50px;
+    padding:5px 0;
+}
+        </style>
+
+        <script>
+            var writer = (element, text) => {
+
+                let fulltext = text 
+
+                let curs = 0
+                let ticks = 0
+                let wait = 0
+                let _interval = null
+
+                return {
+
+                    stop : () => {
+
+                        curs = 0
+                        ticks = 0
+                        wait = 0
+
+                        clearInterval(_interval)
+
+                        _interval = null
+                    },
+
+                    start : (new_text) => {
+
+                        fulltext = new_text || fulltext
+
+                        let autowrite = element().innerHTML = '';
+
+                        _interval = 
+                            setInterval(
+                                () => { 
+
+                                    if(wait > 0) {
+                                        wait --;
+                                        return;
+                                    }
+                                    
+                                    let c = fulltext.charAt(curs)
+                                    
+                                    let autowrite = element().innerHTML
+                                    if(c !== '\n' && curs < fulltext.length ) {
+                                        element().innerHTML += c
+                                        curs++
+                                        wait = (fulltext.charAt(curs) === '\n' || curs >= fulltext.length)? 10 : 2 
+                                    } else if(autowrite !== '' || curs >= fulltext.length) {
+                                        let newstr = autowrite.substring(0, autowrite.length - 1)
+                                        element().innerHTML = newstr
+                                        if(newstr === ''){
+                                            curs++
+                                            if(curs >= fulltext.length) curs = 0 
+                                        } 
+                                    }
+                                }, 
+                                50)
+                    }
+                };
+            }
+        </script>
     </head>
     <body>
-        <!-- the content goes here -->
-        wesh alors !!
+        <h2 style="text-align: right;">.</h2>
+        <div class="main_wrapper">
+            <div class="input_zone io_wrapper">
+                <div id="empire_data_wrapper">
+                    <textarea id="empire_data" ></textarea>
+                </div>
+                <div class="button_wrapper">
+                    <button id="action_button" class="button-49" role="button" onclick="send_empire_data()"> SEND </button>
+                </div>
+                <div id="messages"> </div>
+            </div>
+            
+            <div class="io_wrapper">
+                
+                <div id="odds_display_wrapper">
+                    <div id="odds_display"></div>
+                </div>
+
+                
+                <div id="travel_plan"></div>
+
+            </div>
+            
+            <div>
+                <div id="example_title"></div>
+                <div id="example">
+                        {<br>
+                        &nbsp;&nbsp;"countdown": 8, <br>
+                        &nbsp;&nbsp;"bounty_hunters": [<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;{"planet": "Hoth", "day": 6 },<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;{"planet": "Hoth", "day": 7 },<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;{"planet": "Hoth", "day": 8 }<br>
+                        &nbsp;&nbsp;]<br>
+                        }<br>
+                </div>
+                <div>
+                    <img src="/img/animation.gif" id="anim" >
+                </div>
+            </div>
+
+        </div>
+        <div class="template" id="travel_stops">
+            <div class="{2}">
+                planet {0}  ({1})
+            </div>
+        </div>
+    <script>
+        const writing = 
+            writer (
+                () => document.getElementById("messages"), 
+                [
+                    'millenium falcon to rebel command... do you copy... ?',
+                    'millenium falcon to rebel command... do you copy... ?',
+                    'this is C3PO from the millenium falcon speaking',
+                    'we are currently on stationning Tatooine',
+                    'our mission is to reach Endor and join the Rebel fleet',
+                    'and destroy the Death Star before it annihilates the planet',
+                    'we need your help with the data you itercepted from the empire'
+                ]
+                .join('\n')
+            ) 
+
+        writing.start()
+        
+        const writing2 = 
+            writer (
+                () => document.getElementById("example_title"), 
+                'HERE IS AN EXAMPLE'
+            ) 
+
+        writing2.start()
+        
+        function send_empire_data () {
+            const empire_data = document.getElementById("empire_data").value
+            const output_odds = document.getElementById("odds_display")
+            const output_plan = document.getElementById("travel_plan")
+
+            fetch(
+                "/api/compute-odds",
+                    {
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        method: "POST",
+                        body: empire_data
+                    })
+                    .then(response => response.json())
+                    .then(({odds, travel_plan}) =>{ 
+                        output_odds.innerHTML = `${odds}%`
+                        const template = document.getElementById("travel_stops").innerHTML
+                        output_plan.innerHTML = 
+                            travel_plan
+                            .map(
+                                ({ planet, risky }) => 
+                                    template
+                                    .replace ('{0}', planet)
+                                    .replace ('{1}', risky ? 'WARNING' : 'SAFE')
+                                    .replace ('{2}', risky ? 'warning' : 'safe')
+                            )
+                            .join(" ")
+                    })
+                    .catch(function(res){ 
+                        output_odds.innerHTML = `bad_input`
+                        console.log(res) 
+                    })
+        }
+    </script>
     </body>
 </html>

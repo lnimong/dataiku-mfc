@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": " node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
-    "start": "node web-app/index.js"
+    "start::web": "start http://localhost:3000 && nodemon web-app/index.js"
   },
   "repository": {
     "type": "git",
@@ -22,9 +22,13 @@
     "@babel/core": "^7.16.7",
     "@babel/preset-env": "^7.16.7",
     "babel-jest": "^27.4.6",
-    "jest": "^27.4.7"
+    "jest": "^27.4.7",
+    "nodemon": "^2.0.15"
   },
   "dependencies": {
-    "express": "^4.17.2"
+    "body-parser": "^1.19.1",
+    "express": "^4.17.2",
+    "sqlite": "^4.0.23",
+    "sqlite3": "^5.0.2"
   }
 }
