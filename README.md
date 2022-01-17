@@ -49,9 +49,9 @@ then access to the url http://localhost:3000/
   
   - either...
     - write your empire json data in the input (1) AND push the send button (2)
-    - OR use the upload button  to select a file on your computer (2)
-  - the odds and the travel plan should appear (3 & 4)
-  - on the right (5) there is an example of json input that can be copied 
+    - OR use the upload button  to select a file on your computer (3)
+  - the odds and the travel plan should appear (4 & 5)
+  - on the right (6) there is an example of json input that can be copied 
 <img src="docs/capture2.png">
 
 <br>
