@@ -235,6 +235,14 @@
 
         #travel_plan {
             padding: 20px;
+            max-height: 0;
+            transition-property: max-height;
+            transition-duration: .8s;
+            overflow-y: hidden;
+
+        }
+        #travel_plan.opened {
+            max-height: 100%;
         }
 
 #travel_plan>div {
@@ -306,6 +314,8 @@
 #filesvg:hover {
     color: red;
 }
+
+
         </style>
 
         <script>
@@ -445,12 +455,47 @@
             ) 
 
         writing2.start()
+
+        const handle_computation_success = 
+            ({output_odds, output_plan}) => ({odds, travel_plan}) => {
+                output_odds.innerHTML = `${odds}%`
+                const template = document.getElementById("travel_stops").innerHTML
+                output_plan.innerHTML = 
+                    travel_plan
+                    .map(
+                        ({ planet, risky }) => 
+                            template
+                            .replace ('{0}', planet)
+                            .replace ('{1}', risky ? 'WARNING' : 'SAFE')
+                            .replace ('{2}', risky ? 'warning' : 'safe')
+                    )
+                    .join(" ")
+                output_plan.className = 
+                    output_plan.innerHTML ==  "" 
+                    ? "" 
+                    : "opened"
+
+            }
+        const handle_computation_failure = 
+            ({output_odds, output_plan}) => (err) => {
+                output_odds.innerHTML = `bad_input`
+                output_plan.innerHTML = ""
+                output_plan.className = ""
+                console.log(err) 
+            }
+        
+        const handlers = data => ({
+            on_success : handle_computation_success (data),
+            on_failure : handle_computation_failure (data)
+        })
         
         function send_empire_data () {
             const empire_data = document.getElementById("empire_data").value
-            const output_odds = document.getElementById("odds_display")
-            const output_plan = document.getElementById("travel_plan")
+            const {on_success,on_failure} =  handlers ({ 
+                output_odds : document.getElementById("odds_display"),
+                output_plan : document.getElementById("travel_plan")
 
+            })
             fetch(
                 "/api/compute-odds",
                     {
@@ -462,36 +507,20 @@
                         body: empire_data
                     })
                     .then(response => response.json())
-                    .then(({odds, travel_plan}) =>{ 
-                        output_odds.innerHTML = `${odds}%`
-                        const template = document.getElementById("travel_stops").innerHTML
-                        output_plan.innerHTML = 
-                            travel_plan
-                            .map(
-                                ({ planet, risky }) => 
-                                    template
-                                    .replace ('{0}', planet)
-                                    .replace ('{1}', risky ? 'WARNING' : 'SAFE')
-                                    .replace ('{2}', risky ? 'warning' : 'safe')
-                            )
-                            .join(" ")
-                    })
-                    .catch(function(res){ 
-                        output_odds.innerHTML = `bad_input`
-                        console.log(res) 
-                    })
+                    .then(({odds, travel_plan}) => on_success ({odds, travel_plan}))
+                    .catch((res) => on_failure (res))
         }
         
         function upload_empire_data (e) {
-            const empire_data = document.getElementById("empire_data").value
-            const output_odds = document.getElementById("odds_display")
-            const output_plan = document.getElementById("travel_plan")
-
             const { files } = document.getElementById("file")
+            const {on_success,on_failure} =  handlers ({ 
+                output_odds : document.getElementById("odds_display"),
+                output_plan : document.getElementById("travel_plan")
+
+            })
+
             const form_data = new FormData()
             form_data.append('file', files[0])
-            console.log(files)
-
             fetch(
                 "/api/compute-odds/upload",
                     {
@@ -505,24 +534,9 @@
                     .then(({empire_json, result : { odds, travel_plan }}) =>{ 
                         document.getElementById("empire_data").value = JSON.stringify(empire_json,null, 2)
                         document.getElementById("file").value = null
-
-                        output_odds.innerHTML = `${odds}%`
-                        const template = document.getElementById("travel_stops").innerHTML
-                        output_plan.innerHTML = 
-                            travel_plan
-                            .map(
-                                ({ planet, risky }) => 
-                                    template
-                                    .replace ('{0}', planet)
-                                    .replace ('{1}', risky ? 'WARNING' : 'SAFE')
-                                    .replace ('{2}', risky ? 'warning' : 'safe')
-                            )
-                            .join(" ")
+                        on_success ({odds, travel_plan})
                     })
-                    .catch(function(res){ 
-                        output_odds.innerHTML = `bad_input`
-                        console.log(res) 
-                    })
+                    .catch((res) => on_failure (res))
         }
     </script>
     </body>
