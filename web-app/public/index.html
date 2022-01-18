@@ -72,6 +72,28 @@
     height: 300px;
             }
 
+#overlay {
+    display: none;
+    position: fixed;
+    background-color: #000;
+    left: 0;
+    width: 100%;
+    top: 0;
+    height: 100%;
+    opacity: .5;
+    text-align: center;
+    vertical-align: middle;
+}
+
+#overlay.loading {
+    display: inline-block;
+}
+            
+            .loader {
+                display: inline-block;
+                vertical-align: middle;
+            }
+
             #action_button {
                 cursor: pointer;
             }
@@ -425,6 +447,9 @@
             </div>
 
         </div>
+        <div id="overlay">
+            <img src="/img/loader.gif" class="loader" >
+        </div>
         <div class="template" id="travel_stops">
             <div class="{2}">
                 planet {0}  ({1})
@@ -457,9 +482,10 @@
         writing2.start()
 
         const handle_computation_success = 
-            ({output_odds, output_plan}) => ({odds, travel_plan}) => {
+            ({loader, output_odds, output_plan}) => ({odds, travel_plan}) => {
                 output_odds.innerHTML = `${odds}%`
                 const template = document.getElementById("travel_stops").innerHTML
+                loader.className = ""
                 output_plan.innerHTML = 
                     travel_plan
                     .map(
@@ -477,10 +503,11 @@
 
             }
         const handle_computation_failure = 
-            ({output_odds, output_plan}) => (err) => {
+            ({loader, output_odds, output_plan}) => (err) => {
                 output_odds.innerHTML = `bad_input`
                 output_plan.innerHTML = ""
                 output_plan.className = ""
+                loader.className = ""
                 console.log(err) 
             }
         
@@ -491,11 +518,14 @@
         
         function send_empire_data () {
             const empire_data = document.getElementById("empire_data").value
+            const loader = document.getElementById("overlay")
             const {on_success,on_failure} =  handlers ({ 
+                loader,
                 output_odds : document.getElementById("odds_display"),
                 output_plan : document.getElementById("travel_plan")
 
             })
+            loader.className = "loading"
             fetch(
                 "/api/compute-odds",
                     {
@@ -507,18 +537,23 @@
                         body: empire_data
                     })
                     .then(response => response.json())
-                    .then(({odds, travel_plan}) => on_success ({odds, travel_plan}))
+                    .then(({odds, travel_plan}) => {
+                        on_success ({odds, travel_plan})
+                    })
                     .catch((res) => on_failure (res))
         }
         
         function upload_empire_data (e) {
             const { files } = document.getElementById("file")
+            const loader = document.getElementById("overlay")
             const {on_success,on_failure} =  handlers ({ 
+                loader,
                 output_odds : document.getElementById("odds_display"),
                 output_plan : document.getElementById("travel_plan")
 
             })
 
+            loader.className = "loading"
             const form_data = new FormData()
             form_data.append('file', files[0])
             fetch(
